@@ -9,7 +9,7 @@
   "author": "",
   "license": "ISC",
   "bin": {
-    "nb": "./bin/depana"
+    "depana": "./bin/depana"
   },
   "dependencies": {
     "@antv/g6": "^4.0.3",
