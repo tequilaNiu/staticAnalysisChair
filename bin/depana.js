@@ -12,11 +12,15 @@ const { v4: uuidv4 } = require('uuid');
 const toHump = require('./util.js');
 const server = require('./server.js');
 const ffs = require('fs');
+const cliProgress = require('cli-progress');
 
 let config = {
   routerName: 'router',
   port: 3000,
 };
+let fileTotalNum = 0;
+let fileCount = 0;
+const bar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
 const depana = {
   rootTree: [],
@@ -24,11 +28,28 @@ const depana = {
   controllerTree: [],
   fileAst: null,
   _file: null,
-  start: (path, isTest = false) => {
+  start: async (path, isTest = false) => {
     const _this = depana;
 
+    await new Promise((resolve) => {
+      fs.src([path, '!node_modules/**/*'])
+      .pipe(map((file, cb) => {
+        fileTotalNum++;
+        cb(null, file);
+      }))
+      .on('end', () => {
+        resolve();
+      })
+    })
+
+    bar.start(fileTotalNum, 0, {
+      speed: 'N/A',
+    });
     fs.src([path, '!node_modules/**/*'])
       .pipe(map((file, cb) => {
+        bar.update(fileCount++, {
+          speed: '1'
+        });
         _this.__start(file, isTest);
         cb(null, file);
       }))
@@ -58,6 +79,7 @@ const depana = {
           },
         }));
         server(port);
+        bar.stop();
       });
   },
   __start: (file, isTest = false) => {
