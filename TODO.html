@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>&midast;&midast;TODO-LIST FOR ISSUES&midast;&midast;</title>
+        <style>
+</style>
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item { list-style-type: none; } .task-list-item-checkbox { margin-left: -20px; vertical-align: middle; }
+</style>
+        
+        
+        
+    </head>
+    <body class="vscode-body vscode-light">
+        <h1 id="todo-list-for-issues"><strong>TODO-LIST FOR ISSUES</strong></h1>
+<hr>
+<h2 id="优化点"><strong>优化点</strong></h2>
+<ul>
+<li><strong>支持其他egg项目（比如收益挑战）</strong>
+<ul>
+<li>有些项目有router.js，有些没有是约定的</li>
+<li>加一个参数加以判断类型</li>
+<li>router/controller/service的名称定义可配置，比如有的叫rpc有的叫controller</li>
+</ul>
+</li>
+<li><strong>特殊用例的归纳</strong>
+<ul>
+<li>().().()连续调用的问题</li>
+<li>连续解构的问题 const { obj1 } = obj; const { obj2 } = obj1; ...</li>
+<li>require进来的如何处理</li>
+<li>有的用class有的用function</li>
+<li>循环引用的问题如何避免</li>
+<li>获取ctx.drm.get的参数</li>
+</ul>
+</li>
+<li><strong>匹配算法优化</strong>
+<ul>
+<li>基于esquery的方式寻找元素，是否有更好更完善的匹配规则</li>
+<li>目前是基于eslint espree进行的AST解析，是否可以用其他方案</li>
+<li>递归处理是否可以改为循环遍历，优点在于报错处理，方便恢复上下文，减少内存消耗。</li>
+</ul>
+</li>
+<li><strong>视图优化</strong>
+<ul>
+<li>将不同类型的节点进行分类，分颜色标识</li>
+<li>按照指定name进行搜索匹配</li>
+</ul>
+</li>
+<li><strong>数据结构优化</strong>
+<ul>
+<li>对于每个节点的存储节点目前是<pre><code><code><div>  {
+    id: uuid(),
+    key: '名称',
+    children: [{
+      id: uuid(),
+      key: '名称',
+    }],
+  }
+</div></code></code></pre>
+扩展数据结构具备更丰富的能力</li>
+</ul>
+</li>
+<li><strong>文件</strong>
+<ul>
+<li>最好一上来就能知道匹配的总文件数，方便控制整体进度</li>
+</ul>
+</li>
+</ul>
+<h2 id="整体思路"><strong>整体思路</strong></h2>
+<p><strong>约定</strong></p>
+<ul>
+<li>一个文件中只能存在一种情况 class 或者 function(s)<pre><code><code><div>  // 文件导出class
+  class A extends Controller {}
+  module.exports = A;
+
+  // 文件导出funcs
+  exports.method1 = function() {};
+  exoprts method2 = () =&gt; {};
+</div></code></code></pre>
+</li>
+<li>调用proxy/fengdie/drm/service时不要多层解构<pre><code><code><div>  const { ctx } = this;
+  const { service } = ctx;
+  const { user } = service;
+  const { getName } = user;
+  getName();
+</div></code></code></pre>
+</li>
+<li>调用proxy/fengdie/drm/service后不要以chain的形式继续调用：例如<pre><code><code><div>  this.ctx.service.user.getFriends().filter();
+</div></code></code></pre>
+</li>
+<li>暂且对纯exports.funcs的文件打个标记，对没有extends Controller和Service的类打标记</li>
+</ul>
+<p><strong>逻辑图</strong></p>
+<pre><code class="language-mermaid"><code><div>graph LR
+A[egg根目录] --&gt; B(将每个文件读入流)
+    B --&gt; C{判断文件类型}
+    C --&gt; |router| D(正则每一行)
+    C --&gt; |controller| E(AST)
+    C --&gt; |service| E(AST)
+    E --&gt; |class extends Controller| F(继承Controller的class类型文件)
+    E --&gt; |class extends Service| G(继承Service的class类型文件)
+    E --&gt; |class| H(非继承型class，打标记)
+    F --&gt; I(根据不同类型Query AST)
+    G --&gt; I(根据不同类型Query AST)
+    H --&gt; I(根据不同类型Query AST)
+    I --&gt; J(对Query AST之后的结构格式化)
+</div></code></code></pre>
+
+    </body>
+    </html>
