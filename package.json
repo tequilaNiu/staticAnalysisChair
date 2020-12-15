@@ -9,7 +9,7 @@
   "author": "",
   "license": "ISC",
   "bin": {
-    "depana": "./bin/depana.js"
+    "depana": "./bin/depana"
   },
   "dependencies": {
     "cli-progress": "^3.8.2",
