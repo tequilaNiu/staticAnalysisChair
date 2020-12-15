@@ -295,6 +295,10 @@ const depana = {
     if (str.indexOf('.fengdie.') > -1) {
       return '#ffff00';
     }
+
+    if (str.indexOf('.drm.') > -1) {
+      return '#ffc0cb';
+    }
     
     if (str.indexOf(`.${serviceName}.`) > -1) {
       return '#008000';
